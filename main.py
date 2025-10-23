@@ -1,7 +1,5 @@
 from pdfminer.high_level import extract_text
 import streamlit as st
-import langchainhub
-from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import OpenAIEmbeddings
@@ -10,14 +8,11 @@ from pdfminer.high_level import extract_text
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from langsmith import Client
 import os
 
 client = Client()
-
-
 
 try:
     import streamlit as st
@@ -27,8 +22,6 @@ except ImportError:
 
 RUNNING_ON_STREAMLIT = IS_STREAMLIT and hasattr(st, "secrets") and st.secrets is not None
 RUNNING_ON_STREAMLIT_CLOUD = IS_STREAMLIT and os.environ.get("STREAMLIT_SERVER_HOST") is not None
-
-print(RUNNING_ON_STREAMLIT_CLOUD)
 
 if RUNNING_ON_STREAMLIT_CLOUD:
     # Running in Streamlit
@@ -47,7 +40,6 @@ st.title("RAG app for PDF")
 st.write("Ask questions about your PDF and get accurate answers with Retrieval Augmented Generation (RAG) app.")
 
 uploaded_file = st.file_uploader("Choose a file", "pdf")
-
 
 if uploaded_file is not None:
     text = extract_text(uploaded_file)
@@ -78,7 +70,6 @@ if uploaded_file is not None:
         | StrOutputParser()
     )
     st.write("Completed processing the file. Now ask me anything about it!")
-    # st.write(rag_chain.invoke("Give me a brief of the text"))
 
     prompt = st.text_input("Enter your prompt")
     if prompt:
