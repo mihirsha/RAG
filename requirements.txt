@@ -1,0 +1,11 @@
+streamlit
+pdfminer.six
+chromadb
+faiss-cpu
+langchain
+langchain_chroma
+langchain_community
+langchain_core
+langchain_openai
+langchain_text_splitters
+langchainhub
