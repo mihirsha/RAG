@@ -19,7 +19,7 @@ This is a **prototype** Retrieval-Augmented Generation (RAG) app that allows use
 - **LangChain** – Orchestrating RAG workflow  
 - **OpenAI API** – Generating embeddings and responses  
 - **FAISS** – Vector database for semantic search  
-- **LangChainHub** – Prompt management  
+- **Langsmith** – Tracking, logging, and managing LangChain runs
 
 ## How to Use
 
