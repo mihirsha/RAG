@@ -10,14 +10,36 @@ from pdfminer.high_level import extract_text
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import FAISS
-
+from langchain_core.prompts import ChatPromptTemplate
+from dotenv import load_dotenv
+from langsmith import Client
 import os
 
-hub = langchainhub.Client()
+client = Client()
 
-os.environ["LANGCHAIN_TRACING_V2"] = st.secrets['LANGCHAIN_TRACING_V2']
-os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
-os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+
+
+try:
+    import streamlit as st
+    IS_STREAMLIT = True
+except ImportError:
+    IS_STREAMLIT = False
+
+RUNNING_ON_STREAMLIT = IS_STREAMLIT and hasattr(st, "secrets") and st.secrets is not None
+RUNNING_ON_STREAMLIT_CLOUD = IS_STREAMLIT and os.environ.get("STREAMLIT_SERVER_HOST") is not None
+
+print(RUNNING_ON_STREAMLIT_CLOUD)
+
+if RUNNING_ON_STREAMLIT_CLOUD:
+    # Running in Streamlit
+    os.environ["LANGCHAIN_TRACING_V2"] = st.secrets['LANGCHAIN_TRACING_V2']
+    os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
+    os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+    print("Environment: Streamlit")
+else:
+    # Running locally
+    load_dotenv(dotenv_path=".env", override=True)
+    print("Environment: Local")
 
 llm = ChatOpenAI(model="gpt-4o-mini")
 
@@ -44,12 +66,10 @@ if uploaded_file is not None:
 
     # Retrieve and generate using the relevant snippets of the blog.
     retriever = vectorstore.as_retriever()
-    prompt = hub.pull("rlm/rag-prompt")
-
+    prompt = client.pull_prompt("rlm/rag-prompt")
 
     def format_docs(text):
         return text
-
 
     rag_chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -63,6 +83,8 @@ if uploaded_file is not None:
     prompt = st.text_input("Enter your prompt")
     if prompt:
         response = rag_chain.invoke(prompt)
+
+        print(response)
         st.write(response)
 
 else:
